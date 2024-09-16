@@ -117,21 +117,32 @@ public class MainActivity extends Activity {
     private void startButtonThread(int buttonIndex) {
         isButtonRunning[buttonIndex] = true;
         updateButtonColor(buttonIndex);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String buttonTime = preferences.getString("buttonTime_" + (buttonIndex + 1), null);
+        Log.d("MainActivity", "Time to click: " + getTimeInMillis(buttonTime));
+
         
         executorService.execute(() -> {
             try {
                 while (isButtonRunning[buttonIndex]) {
                     long remainingTime = getTimeUntilClick(buttonIndex);
-                    if (remainingTime > 100) {
-
+                    if (remainingTime >60) {
                         updateRemainingTime(buttonIndex, remainingTime);
-                        Thread.sleep(Math.min(remainingTime, 10)); // Sleep for remaining time or 100ms, whichever is smaller
+                        Thread.sleep( 50); // Sleep for remaining time or 100ms, whichever is smaller
+
                     } else {
-                        //print to the console that the button has been clicked
-                        Log.d("MainActivity", "Button " + (buttonIndex + 1) + " clicked");
-                        Log.d("MainActivity", "Remaining time: " + remainingTime);
+                       
+                        if (remainingTime > 1) {
+                            long timetoClick = getTimeInMillis(buttonTime);
+                            Log.d("MainActivity", "Time to click: " + timetoClick);
+                            while (remainingTime >1) {
+                                remainingTime=timetoClick-System.currentTimeMillis();
+                            }
+                            
+                        }
                         performClick(buttonIndex);
                         stopButtonThread(buttonIndex);
+                        Log.d("MainActivity", "Remaining time: " + remainingTime);
                         break;
                     }
                 }
@@ -141,6 +152,34 @@ public class MainActivity extends Activity {
         });
     }
 
+
+    //make a method that takes time in the format of hh:mm:ss.sss and returns the time in milliseconds
+    private long getTimeInMillis(String time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
+        try {
+            Date targetTime = sdf.parse(time);
+
+            Calendar targetCalendar = Calendar.getInstance();
+            targetCalendar.setTime(targetTime);
+
+            Calendar currentCalendar = Calendar.getInstance();
+
+            // Set the target time to today
+            targetCalendar.set(Calendar.YEAR, currentCalendar.get(Calendar.YEAR));
+            targetCalendar.set(Calendar.MONTH, currentCalendar.get(Calendar.MONTH));
+            targetCalendar.set(Calendar.DAY_OF_MONTH, currentCalendar.get(Calendar.DAY_OF_MONTH));
+
+
+            return targetCalendar.getTimeInMillis();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    
+
+
     private long getTimeUntilClick(int buttonIndex) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String buttonTime = preferences.getString("buttonTime_" + (buttonIndex + 1), null);
@@ -148,7 +187,7 @@ public class MainActivity extends Activity {
         if (buttonTime == null || buttonTime.equals("Time not set")) return -1;
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SS", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
             Date targetTime = sdf.parse(buttonTime);
             Date currentTime = new Date();
             
@@ -230,7 +269,7 @@ public class MainActivity extends Activity {
         if (buttonTime == null) return false;
 
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SS", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
             Date targetTime = sdf.parse(buttonTime);
             Date currentTime = new Date();
 

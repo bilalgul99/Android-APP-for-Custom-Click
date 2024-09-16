@@ -37,7 +37,6 @@ public class MainActivity extends Activity {
 
     private boolean isConfigMode = true;
     private ExecutorService executorService;
-    private ScheduledExecutorService scheduledExecutorService;
     private Handler mainHandler;
 
     private boolean[] isButtonRunning = new boolean[5];
@@ -48,7 +47,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         executorService = Executors.newFixedThreadPool(5);
-        scheduledExecutorService = Executors.newScheduledThreadPool(5);
         mainHandler = new Handler(Looper.getMainLooper());
 
         initializeViews();
@@ -119,13 +117,16 @@ public class MainActivity extends Activity {
         updateButtonColor(buttonIndex);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String buttonTime = preferences.getString("buttonTime_" + (buttonIndex + 1), null);
-        Log.d("MainActivity", "Time to click: " + getTimeInMillis(buttonTime));
+        String gapTime = preferences.getString("gapTime",null);
+        //convert gap time to long and multiply by 1000 to get milliseconds
+        long gapTimeInMillis = (long)(Float.parseFloat(gapTime) * 1000);
+        Log.d("MainActivity", "Time to click: " + getTimeInMillis(buttonTime)+gapTimeInMillis);
 
         
         executorService.execute(() -> {
             try {
                 while (isButtonRunning[buttonIndex]) {
-                    long timetoClick = getTimeInMillis(buttonTime);
+                    long timetoClick = getTimeInMillis(buttonTime)+gapTimeInMillis;
                     long remainingTime = timetoClick-System.currentTimeMillis();
                     if (remainingTime >60) {
                         updateRemainingTime(buttonIndex, remainingTime);
@@ -379,6 +380,7 @@ public class MainActivity extends Activity {
         float buttonX = preferences.getFloat("buttonX_" + buttonId, -1);
         float buttonY = preferences.getFloat("buttonY_" + buttonId, -1);
 
+
         button.setText(buttonName);
         if (buttonX != -1 && buttonY != -1) {
             status.setText(String.format(Locale.getDefault(), "Time: %s, X: %.2f, Y: %.2f", buttonTime, buttonX, buttonY));
@@ -392,6 +394,5 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         executorService.shutdownNow();
-        scheduledExecutorService.shutdownNow();
     }
 }

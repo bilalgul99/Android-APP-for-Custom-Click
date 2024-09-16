@@ -50,16 +50,39 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"/>
 
-    <!-- Set Coordinates Button -->
-    <Button
-        android:id="@+id/setCoordinatesButton"
+    <!-- GAP Time Input -->
+    <TextView
+        android:id="@+id/gapTimeLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set Click Coordinates"
+        android:text="GAP Time (SS.SSS):"
         app:layout_constraintTop_toBottomOf="@id/timeEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp"/>
+
+    <EditText
+        android:id="@+id/gapTimeEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="SS.SSS"
+        app:layout_constraintTop_toBottomOf="@id/gapTimeLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"/>
+
+    <!-- Set Coordinates Button -->
+    <Button
+        android:id="@+id/setCoordinatesButton"
+        app:layout_constraintTop_toBottomOf="@id/gapTimeEditText"
+        android:text="Set Click Coordinates"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        />
 
     <!-- Coordinates Display -->
     <TextView

@@ -20,7 +20,7 @@ import android.graphics.Color;
 
 public class ButtonConfigActivity extends AppCompatActivity {
 
-    private EditText nameEditText, timeEditText;
+    private EditText nameEditText, timeEditText, gapTimeEditText;
     private TextView coordinateTextView;
     private Button setCoordinatesButton, saveButton;
     private int buttonId;
@@ -35,6 +35,7 @@ public class ButtonConfigActivity extends AppCompatActivity {
 
         nameEditText = findViewById(R.id.nameEditText);
         timeEditText = findViewById(R.id.timeEditText);
+        gapTimeEditText = findViewById(R.id.gapTimeEditText);
         coordinateTextView = findViewById(R.id.coordinateTextView);
         setCoordinatesButton = findViewById(R.id.setCoordinatesButton);
         saveButton = findViewById(R.id.saveButton);
@@ -79,7 +80,9 @@ public class ButtonConfigActivity extends AppCompatActivity {
         // Save button click listener
         saveButton.setOnClickListener(v -> {
             // Validate inputs
-            if (nameEditText.getText().toString().isEmpty() || timeEditText.getText().toString().isEmpty()) {
+            if (nameEditText.getText().toString().isEmpty() || 
+                timeEditText.getText().toString().isEmpty() ||
+                gapTimeEditText.getText().toString().isEmpty()) {
                 Toast.makeText(ButtonConfigActivity.this, "Please enter all fields.", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -112,6 +115,10 @@ public class ButtonConfigActivity extends AppCompatActivity {
         editor.putString("buttonTime_" + buttonId, timeEditText.getText().toString());
         editor.putFloat("buttonX_" + buttonId, clickX);
         editor.putFloat("buttonY_" + buttonId, clickY);
+        
+        // Save GAP time without buttonId
+        editor.putString("gapTime", gapTimeEditText.getText().toString());
+        
         editor.apply();
     }
 
@@ -124,8 +131,13 @@ public class ButtonConfigActivity extends AppCompatActivity {
         clickX = preferences.getFloat("buttonX_" + buttonId, -1);
         clickY = preferences.getFloat("buttonY_" + buttonId, -1);
 
+        // Load GAP time (without buttonId)
+        String gapTime = preferences.getString("gapTime", "");
+
         nameEditText.setText(buttonName);
         timeEditText.setText(buttonTime);
+        gapTimeEditText.setText(gapTime);
+        
         if (clickX != -1 && clickY != -1) {
             coordinateTextView.setText(String.format(Locale.getDefault(), "X: %.2f, Y: %.2f", clickX, clickY));
         }

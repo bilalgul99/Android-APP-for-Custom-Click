@@ -125,7 +125,8 @@ public class MainActivity extends Activity {
         executorService.execute(() -> {
             try {
                 while (isButtonRunning[buttonIndex]) {
-                    long remainingTime = getTimeUntilClick(buttonIndex);
+                    long timetoClick = getTimeInMillis(buttonTime);
+                    long remainingTime = timetoClick-System.currentTimeMillis();
                     if (remainingTime >60) {
                         updateRemainingTime(buttonIndex, remainingTime);
                         Thread.sleep( 50); // Sleep for remaining time or 100ms, whichever is smaller
@@ -133,7 +134,7 @@ public class MainActivity extends Activity {
                     } else {
                        
                         if (remainingTime > 1) {
-                            long timetoClick = getTimeInMillis(buttonTime);
+
                             Log.d("MainActivity", "Time to click: " + timetoClick);
                             while (remainingTime >1) {
                                 remainingTime=timetoClick-System.currentTimeMillis();
@@ -177,47 +178,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    
-
-
-    private long getTimeUntilClick(int buttonIndex) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String buttonTime = preferences.getString("buttonTime_" + (buttonIndex + 1), null);
-        
-        if (buttonTime == null || buttonTime.equals("Time not set")) return -1;
-
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
-            Date targetTime = sdf.parse(buttonTime);
-            Date currentTime = new Date();
-            
-            Calendar targetCalendar = Calendar.getInstance();
-            targetCalendar.setTime(targetTime);
-            
-            Calendar currentCalendar = Calendar.getInstance();
-            currentCalendar.setTime(currentTime);
-            
-            // Set the target time to today
-            targetCalendar.set(Calendar.YEAR, currentCalendar.get(Calendar.YEAR));
-            targetCalendar.set(Calendar.MONTH, currentCalendar.get(Calendar.MONTH));
-            targetCalendar.set(Calendar.DAY_OF_MONTH, currentCalendar.get(Calendar.DAY_OF_MONTH));
-            
-            // Calculate time difference
-            long timeDiff = targetCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
-            
-            // If the time has already passed today, set it for tomorrow
-            if (timeDiff < 0) {
-                targetCalendar.add(Calendar.DAY_OF_MONTH, 1);
-                timeDiff = targetCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
-            }
-            
-            return timeDiff;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
     private void updateRemainingTime(int buttonIndex, long remainingTime) {
         TextView status = getStatusByIndex(buttonIndex);
         Button button = getButtonByIndex(buttonIndex);
@@ -240,6 +200,46 @@ public class MainActivity extends Activity {
             });
         }
     }
+    private long getTimeUntilClick(int buttonIndex) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String buttonTime = preferences.getString("buttonTime_" + (buttonIndex + 1), null);
+
+        if (buttonTime == null || buttonTime.equals("Time not set")) return -1;
+
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
+            Date targetTime = sdf.parse(buttonTime);
+            Date currentTime = new Date();
+
+            Calendar targetCalendar = Calendar.getInstance();
+            targetCalendar.setTime(targetTime);
+
+            Calendar currentCalendar = Calendar.getInstance();
+            currentCalendar.setTime(currentTime);
+
+            // Set the target time to today
+            targetCalendar.set(Calendar.YEAR, currentCalendar.get(Calendar.YEAR));
+            targetCalendar.set(Calendar.MONTH, currentCalendar.get(Calendar.MONTH));
+            targetCalendar.set(Calendar.DAY_OF_MONTH, currentCalendar.get(Calendar.DAY_OF_MONTH));
+
+            // Calculate time difference
+            long timeDiff = targetCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
+
+            // If the time has already passed today, set it for tomorrow
+            if (timeDiff < 0) {
+                targetCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                timeDiff = targetCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
+            }
+
+            return timeDiff;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+
+
 
     private TextView getStatusByIndex(int index) {
         switch (index) {
